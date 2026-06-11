@@ -1,65 +1,61 @@
-import Image from "next/image";
+import { Button } from "@/components/ui/Button";
+import { PlayerCard } from "@/components/landing/PlayerCard";
+import { TracksGrid } from "@/components/landing/TracksGrid";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { getUserState } from "@/lib/data";
+import { CATALOG, TRACK_XP_TOTAL } from "@/content/system-design/_catalog";
+import { STAGES, TRACK_BONUS_XP, fmt } from "@/lib/constants";
 
-export default function Home() {
+export default async function LandingPage() {
+  const user = await getUserState();
+  const done = new Set(user.completedSlugs);
+  const current = CATALOG.find((l) => !done.has(l.slug)) ?? CATALOG[CATALOG.length - 1];
+  const doneCount = user.completedSlugs.length;
+  const pct = Math.round((doneCount / CATALOG.length) * 100);
+  const allDone = doneCount === CATALOG.length;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <section className="relative overflow-hidden grid-texture bg-dark text-paper px-6 sm:px-14 pt-[84px] pb-[92px]">
+        <div className="relative max-w-[1160px] mx-auto grid grid-cols-1 lg:grid-cols-[1.2fr_.8fr] gap-[72px] items-center">
+          <div className="flex flex-col gap-[26px]">
+            <div className="font-mono text-[13px] text-amber tracking-[.04em]">
+              $ forge start --track=system-design
+            </div>
+            <h1 className="m-0 text-5xl sm:text-[74px] leading-none font-extrabold tracking-[-.025em]">
+              Master the <span className="text-amber">systems</span> behind the software.
+            </h1>
+            <p className="m-0 text-[19px] leading-[1.6] text-[#cbb7a2] max-w-[520px]">
+              Roadmap-driven deep dives into system design, frontend, backend, data structures
+              and algorithms. Read deeply, earn XP, keep the streak alive.
+            </p>
+            <div className="flex flex-wrap gap-3.5 items-center">
+              <Button variant="amber" href={`/lessons/${current.slug}`}>
+                {allDone
+                  ? "Revisit the track →"
+                  : `${doneCount > 0 ? "Continue" : "Start"}: ${current.title} →`}
+              </Button>
+              <Button variant="ghost-dark" href="/roadmap">
+                View the roadmap
+              </Button>
+            </div>
+            <div className="font-mono text-xs tracking-[.08em] text-muted">
+              {CATALOG.length} LESSONS · {STAGES.length} MILESTONES ·{" "}
+              {fmt(TRACK_XP_TOTAL + TRACK_BONUS_XP)} XP IN TRACK 01
+            </div>
+          </div>
+          <PlayerCard
+            xp={user.xp}
+            streak={user.streak}
+            doneCount={doneCount}
+            lessonCount={CATALOG.length}
+            nextXp={current.xp}
+          />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+
+      <TracksGrid doneCount={doneCount} lessonCount={CATALOG.length} pct={pct} />
+      <HowItWorks />
+    </>
   );
 }

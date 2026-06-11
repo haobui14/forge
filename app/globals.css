@@ -1,26 +1,165 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* ---- Forge design tokens (from design handoff README) ---- */
+  --color-paper: #faf4eb;
+  --color-card: #fffdf8;
+  --color-ink: #2b1a0e;
+  --color-body: #41311f;
+  --color-muted: #8c7a68;
+  --color-faint: #bca98d;
+  --color-line: #e9dcc9;
+  --color-line-soft: #f0e6d6;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-terracotta: #c2522e;
+  --color-terracotta-deep: #9e3e20;
+  --color-terracotta-border: #a03e1f;
+  --color-terracotta-shadow: #7e3014;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-amber: #e89b18;
+  --color-amber-deep: #c07f0b;
+  --color-amber-shadow: #9c6708;
+  --color-amber-text: #8a5b05;
+  --color-amber-text-soft: #b5790f;
+  --color-amber-wash: #fcebcb;
+  --color-amber-wash-border: #e8c98a;
+
+  --color-highlight: #f3d8a8;
+  --color-glyph-wash: #f4e9d8;
+
+  --color-dark: #241710;
+  --color-dark-2: #2e1d12;
+
+  --color-quiz-correct-bg: #edf2e4;
+  --color-quiz-correct-border: #7e9a62;
+  --color-quiz-correct-text: #5e7c44;
+  --color-quiz-wrong-bg: #fae5dc;
+
+  /* supporting shades read off the prototype */
+  --color-tab-inactive: #6e5b49;
+  --color-chip-soft: #b9a78f;
+  --color-sand: #d8c4a4;
+  --color-sand-deep: #c4b299;
+  --color-disabled-wash: #efe4d0;
+  --color-path-dot: #e0d2ba;
+  --color-cream: #fff6e9;
+  --color-reminder-text: #5c432b;
+
+  --font-sans: var(--font-bricolage), sans-serif;
+  --font-mono: var(--font-jetbrains), monospace;
+
+  --animate-pulse-ring: pulseRing 2.2s ease-out infinite;
+  --animate-float-y: floatY 3.4s ease-in-out infinite;
+  --animate-pop-in: popIn 0.45s ease;
+
+  @keyframes pulseRing {
+    0% {
+      box-shadow: 0 0 0 0 rgba(232, 155, 24, 0.5);
+    }
+    70% {
+      box-shadow: 0 0 0 18px rgba(232, 155, 24, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(232, 155, 24, 0);
+    }
+  }
+  @keyframes confettiFall {
+    0% {
+      transform: translateY(-8vh) rotate(0deg);
+    }
+    100% {
+      transform: translateY(115vh) rotate(680deg);
+    }
+  }
+  @keyframes popIn {
+    0% {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.06);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes floatY {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
   }
 }
 
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--color-highlight);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* grid texture overlay for dark surfaces (hero, up-next card) */
+.grid-texture::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+      0deg,
+      rgba(250, 244, 235, 0.05) 0 1px,
+      transparent 1px 52px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(250, 244, 235, 0.05) 0 1px,
+      transparent 1px 52px
+    );
+  pointer-events: none;
+}
+
+.grid-texture-fine::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+      0deg,
+      rgba(250, 244, 235, 0.04) 0 1px,
+      transparent 1px 44px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(250, 244, 235, 0.04) 0 1px,
+      transparent 1px 44px
+    );
+  pointer-events: none;
+}
+
+/* amber text highlighter used on key phrases in lesson prose */
+.hl {
+  background: linear-gradient(transparent 65%, var(--color-highlight) 65%);
+  font-weight: 700;
+}
+
+/* gradient progress fill */
+.progress-fill {
+  background: linear-gradient(90deg, #c2522e, #e89b18);
 }
