@@ -11,6 +11,8 @@ interface Props {
   variant: Variant;
   completedSlugs: string[];
   stageEarned: boolean[];
+  /** signed-out browsing: locked styling stays, but every lesson is openable */
+  browseAll: boolean;
 }
 
 function LessonNode({
@@ -20,6 +22,7 @@ function LessonNode({
   state,
   variant,
   cx,
+  browseAll,
   onOpen,
 }: {
   lesson: LessonMeta;
@@ -28,11 +31,14 @@ function LessonNode({
   state: "done" | "current" | "locked";
   variant: Variant;
   cx: number;
+  browseAll: boolean;
   onOpen: (slug: string) => void;
 }) {
   // Mobile: path hugs the left edge, labels always sit to the right.
   const side = variant === "mobile" ? "right" : nodeSide(p, cx);
-  const locked = state === "locked";
+  // Sequential unlock only applies to tracked progress; anonymous visitors
+  // can open any lesson (locked visuals are kept as the "not yet read" cue).
+  const locked = state === "locked" && !browseAll;
   const open = locked ? undefined : () => onOpen(lesson.slug);
 
   const circleColors =
@@ -45,8 +51,8 @@ function LessonNode({
   const meta =
     state === "done"
       ? `COMPLETE · +${lesson.xp} XP`
-      : locked
-        ? `LOCKED · ${lesson.minutes} MIN`
+      : state === "locked"
+        ? `${browseAll ? "READ" : "LOCKED"} · ${lesson.minutes} MIN`
         : `+${lesson.xp} XP · ${lesson.minutes} MIN`;
 
   const metaColor =
@@ -133,7 +139,7 @@ function MilestoneNode({
   );
 }
 
-export function RoadmapCanvas({ geo, variant, completedSlugs, stageEarned }: Props) {
+export function RoadmapCanvas({ geo, variant, completedSlugs, stageEarned, browseAll }: Props) {
   const router = useRouter();
   const done = new Set(completedSlugs);
   const { layout, seq, points, pathD, pathDone, mapH, currentIndex } = geo;
@@ -178,6 +184,7 @@ export function RoadmapCanvas({ geo, variant, completedSlugs, stageEarned }: Pro
             }
             variant={variant}
             cx={layout.cx}
+            browseAll={browseAll}
             onOpen={(slug) => router.push(`/lessons/${slug}`)}
           />
         ) : (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CelebrationOverlay } from "@/components/ui/CelebrationOverlay";
 import { completeLesson } from "@/lib/actions";
@@ -78,12 +79,25 @@ export function LessonCompletion({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[18px] mt-[18px] pt-[26px] border-t border-line">
         <div className="flex flex-col gap-[3px]">
           {next ? (
-            <>
-              <div className="font-mono text-[11px] tracking-[.1em] text-muted">
-                UP NEXT · LESSON {String(next.position).padStart(2, "0")}
-              </div>
-              <div className="text-[17px] font-bold">{next.title}</div>
-            </>
+            // Reachable once this lesson is done — or any time when browsing
+            // without an account (nothing to unlock without tracked progress).
+            !signedIn || completed ? (
+              <Link href={`/lessons/${next.slug}`} className="group flex flex-col gap-[3px]">
+                <div className="font-mono text-[11px] tracking-[.1em] text-muted">
+                  UP NEXT · LESSON {String(next.position).padStart(2, "0")}
+                </div>
+                <div className="text-[17px] font-bold group-hover:text-terracotta-deep transition-colors">
+                  {next.title} →
+                </div>
+              </Link>
+            ) : (
+              <>
+                <div className="font-mono text-[11px] tracking-[.1em] text-muted">
+                  UP NEXT · LESSON {String(next.position).padStart(2, "0")}
+                </div>
+                <div className="text-[17px] font-bold">{next.title}</div>
+              </>
+            )
           ) : (
             <>
               <div className="font-mono text-[11px] tracking-[.1em] text-muted">

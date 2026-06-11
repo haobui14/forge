@@ -68,7 +68,7 @@ export default async function RoadmapPage() {
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-card border-[1.5px] border-sand inline-block" />
-                LOCKED
+                {user.signedIn ? "LOCKED" : "TO READ"}
               </div>
             </div>
           </div>
@@ -81,6 +81,7 @@ export default async function RoadmapPage() {
             variant="desktop"
             completedSlugs={user.completedSlugs}
             stageEarned={earned}
+            browseAll={!user.signedIn}
           />
         </div>
         <div className="md:hidden">
@@ -89,6 +90,7 @@ export default async function RoadmapPage() {
             variant="mobile"
             completedSlugs={user.completedSlugs}
             stageEarned={earned}
+            browseAll={!user.signedIn}
           />
         </div>
       </section>
