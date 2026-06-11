@@ -29,9 +29,16 @@ export async function updateSession(request: NextRequest) {
 
   // Refresh session cookies on every request. Per Supabase SSR docs, getUser()
   // must run immediately after createServerClient, before any other logic.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // If the auth backend is unreachable, treat the visitor as signed out so
+  // public pages keep working instead of 500ing.
+  let user = null;
+  try {
+    ({
+      data: { user },
+    } = await supabase.auth.getUser());
+  } catch {
+    user = null;
+  }
 
   const path = request.nextUrl.pathname;
   const needsAuth = PROTECTED_PATHS.some((p) => path === p || path.startsWith(`${p}/`));

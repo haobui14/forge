@@ -25,9 +25,16 @@ function currentWeekDays(): string[] {
 // One round of fetches per request (React cache dedupes across layout + page).
 export const getUserState = cache(async (): Promise<UserState> => {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    ({
+      data: { user },
+    } = await supabase.auth.getUser());
+  } catch {
+    // Auth backend unreachable — degrade to the read-only signed-out view
+    // instead of failing the whole page.
+    return SIGNED_OUT_USER;
+  }
   if (!user) return SIGNED_OUT_USER;
 
   const week = currentWeekDays();
