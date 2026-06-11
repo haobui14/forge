@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { supabaseConfigured } from "@/lib/supabase/config";
 import {
   SIGNED_OUT_USER,
   type LeaderboardRow,
@@ -24,6 +25,7 @@ function currentWeekDays(): string[] {
 
 // One round of fetches per request (React cache dedupes across layout + page).
 export const getUserState = cache(async (): Promise<UserState> => {
+  if (!supabaseConfigured()) return SIGNED_OUT_USER;
   const supabase = await createClient();
   let user = null;
   try {

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AuthCard, Field, FormNotice } from "@/components/auth/AuthCard";
+import { AccountsDisabledNotice } from "@/components/auth/AccountsDisabledNotice";
 import { signup } from "@/lib/actions";
+import { supabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = { title: "Create account" };
 
@@ -11,6 +13,10 @@ export default async function SignupPage({
   searchParams: Promise<{ error?: string; next?: string }>;
 }) {
   const { error, next } = await searchParams;
+
+  if (!supabaseConfigured()) {
+    return <AccountsDisabledNotice kicker="$ forge init --new-builder" />;
+  }
 
   return (
     <AuthCard kicker="$ forge init --new-builder" title="Start your quest line.">

@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { supabaseConfigured } from "@/lib/supabase/config";
 
 const HANDLE_RE = /^[a-z0-9_.]{3,24}$/;
+const ACCOUNTS_DISABLED = "Accounts aren't enabled on this deployment yet.";
 
 function safeNext(next: unknown): string {
   const n = String(next ?? "");
@@ -13,6 +15,9 @@ function safeNext(next: unknown): string {
 
 export async function login(formData: FormData) {
   const next = safeNext(formData.get("next"));
+  if (!supabaseConfigured()) {
+    redirect(`/auth/login?error=${encodeURIComponent(ACCOUNTS_DISABLED)}`);
+  }
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
     email: String(formData.get("email") ?? "").trim(),
@@ -35,6 +40,9 @@ export async function signup(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
+  if (!supabaseConfigured()) {
+    redirect(`/auth/signup?error=${encodeURIComponent(ACCOUNTS_DISABLED)}`);
+  }
   if (!HANDLE_RE.test(handle)) {
     redirect(
       `/auth/signup?error=${encodeURIComponent(
@@ -66,6 +74,7 @@ export async function signup(formData: FormData) {
 }
 
 export async function signOut() {
+  if (!supabaseConfigured()) redirect("/");
   const supabase = await createClient();
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
@@ -82,6 +91,7 @@ export interface CompleteLessonResult {
 export async function completeLesson(
   slug: string,
 ): Promise<CompleteLessonResult | { error: string }> {
+  if (!supabaseConfigured()) return { error: ACCOUNTS_DISABLED };
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("complete_lesson", { p_slug: slug });
   if (error) return { error: error.message };
@@ -90,6 +100,7 @@ export async function completeLesson(
 }
 
 export async function recordQuizAttempt(slug: string, isCorrect: boolean) {
+  if (!supabaseConfigured()) return;
   const supabase = await createClient();
   // Best-effort: signed-out users simply don't get Quiz Whiz credit.
   await supabase.rpc("record_quiz_attempt", { p_slug: slug, p_is_correct: isCorrect });

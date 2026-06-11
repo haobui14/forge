@@ -1,11 +1,28 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { supabaseConfigured } from "./config";
 
 // Soft-gate strategy: lessons and the roadmap are publicly readable;
 // only the dashboard requires a session.
 const PROTECTED_PATHS = ["/dashboard"];
 
+function isProtected(path: string) {
+  return PROTECTED_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+}
+
 export async function updateSession(request: NextRequest) {
+  // Content-only deployment (no Supabase configured): everything public is
+  // readable; account-only pages route to the "accounts disabled" notice.
+  if (!supabaseConfigured()) {
+    if (isProtected(request.nextUrl.pathname)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/login";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -41,7 +58,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   const path = request.nextUrl.pathname;
-  const needsAuth = PROTECTED_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+  const needsAuth = isProtected(path);
 
   if (!user && needsAuth) {
     const url = request.nextUrl.clone();

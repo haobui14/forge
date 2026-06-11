@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AuthCard, Field, FormNotice } from "@/components/auth/AuthCard";
+import { AccountsDisabledNotice } from "@/components/auth/AccountsDisabledNotice";
 import { login } from "@/lib/actions";
+import { supabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -11,6 +13,10 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string; message?: string; next?: string }>;
 }) {
   const { error, message, next } = await searchParams;
+
+  if (!supabaseConfigured()) {
+    return <AccountsDisabledNotice kicker="$ forge login" />;
+  }
 
   return (
     <AuthCard kicker="$ forge login" title="Welcome back, builder.">
